@@ -12,6 +12,18 @@ namespace BasicSecurity_Crypto_Program
     {
         static void Main(string[] args)
         {
+            //Opvragen username
+            Console.Write("Username: ");
+            //Username opslaan in de variabele username 
+            string username = Console.ReadLine();
+            //Opvragen wachtwoord
+            Console.Write("Password: ");
+            //Wachtwoord opslaan in de variabele password
+            string password = Console.ReadLine(); 
+
+            //Keuzes geven aan de gebruiker 
+            
+
             Console.WriteLine("Test Aes and AOS");
             User Giel = new User("Giel");
 
