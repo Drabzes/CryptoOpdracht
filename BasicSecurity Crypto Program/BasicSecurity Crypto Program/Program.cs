@@ -13,7 +13,7 @@ namespace BasicSecurity_Crypto_Program
         static void Main(string[] args)
         {
             Console.WriteLine("Test Aes and AOS");
-            User Giel = new User("Giel");
+            //User Giel = new User("Giel");
             
 
             //Try aes encryption
@@ -30,7 +30,8 @@ namespace BasicSecurity_Crypto_Program
                     string _fileName = "AesStringByteFile";
                     //Giel added
                     //Convert AesKey bytes to a string
-                    Giel.setKeyAesByte(myAes.Key);
+                    User Giel = new User("Giel", myAes.Key);
+                    //Giel.setKeyAesByte(myAes.Key);
                     string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
 
                     //Giel added
