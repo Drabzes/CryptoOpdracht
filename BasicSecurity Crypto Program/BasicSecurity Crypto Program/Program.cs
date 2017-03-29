@@ -14,7 +14,7 @@ namespace BasicSecurity_Crypto_Program
         {
             Console.WriteLine("Test Aes and AOS");
             User Giel = new User("Giel");
-            
+            //Ik heb echt geen idee hoe github werkt. FeelsBadMan
             //Try aes encryption
             try
             {
