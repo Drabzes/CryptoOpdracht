@@ -15,7 +15,7 @@ namespace BasicSecurity_Crypto_Program
             Console.WriteLine("Test Aes and AOS");
             User Giel = new User("Giel");
             
-
+            //Hier typte joris 
             //Try aes encryption
             try
             {
