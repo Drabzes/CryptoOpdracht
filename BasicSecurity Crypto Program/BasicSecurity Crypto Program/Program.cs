@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BasicSecurity_Crypto_Program.Cryptos;
+using BasicSecurity_Crypto_Program.Utility;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,39 +15,88 @@ namespace BasicSecurity_Crypto_Program
         static void Main(string[] args)
         {
             Console.WriteLine("Test Aes and AOS");
-            User Giel = new User("Giel");
-            
-
             //Try aes encryption
             try
             {
-                
+                bool writeByteText = false;
                 string original = "Here is some data to encrypt! AES";
                 Console.WriteLine("In try of Aes");
+                User selectedUser = null;
+
+                Console.Write("Enter userName:  "); // Prompt
+                string line = Console.ReadLine(); // Get string from user
+
                 // Create a new instance of the Aes
                 // class.  This generates a new key and initialization 
                 // vector (IV).
                 using (Aes myAes = Aes.Create())
                 {
-                    string _fileName = "AesStringByteFile";
-                    //Giel added
-                    //Convert AesKey bytes to a string
-                    Giel.setKeyAesByte(myAes.Key);
-                    string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
+                    Console.WriteLine("Loading UserData..");
+                    string _fileName;
 
                     //Giel added
-                    //get converted bytes key from User Giel
-                    //Write in in the console for tests
-                    Console.WriteLine("Encrypted Aeskey: " + Giel.getAesStringkey());
+                    //Get the fileName of the selected user his AOSkey.
+                    _fileName = string.Format("{0}-AOSKey", line);
+
+                    //Giel added
+                    //Look for a file named Giel-AOSKey
+                    //If file is found don't make a new key for User
+                    if (FileUtility.CheckFileExist(_fileName))
+                    {
+                        Console.WriteLine("AOSKey found!");
+                        //Read file with the AesKey into memory
+                        byte[] AOSKey = FileUtility.ReadByteArrayFromFile(_fileName);
+                        //Create user with selected name and loaded key and place it in the memory.
+                        selectedUser = new User(line, AOSKey);
+                        Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
+                    }
+                    else
+                    {
+                        Console.WriteLine("AOSKey was not found!");
+                        Console.WriteLine("Using default user Giel");
+                        
+                        //Convert AesKey bytes to a string
+                        selectedUser = new User("Giel", myAes.Key);
+
+                        //Create file with private key for Giel.
+                        //Filename = "userName"-AOSKey.bit
+                        string _nameFilePrivateKey = string.Format("{0}-AOSKey", selectedUser.getUserName());
+                        if (FileUtility.ByteArrayToFile(_nameFilePrivateKey, myAes.Key) == true)
+                        {
+                            Console.WriteLine("Key saved");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Something went wrong saving the key");
+                        }
+
+                        //get converted bytes key from User Giel
+                        //Write in in the console for tests
+                        Console.WriteLine("Encrypted Aeskey: " + selectedUser.getAesStringkey());
+                    }
+
+                    _fileName = "AesStringByteFile";
+
+                    //Giel added
+                    //Load the Aeskey from the user into myAes.key
+                    myAes.Key = selectedUser.getKeyAesByte();
+                    string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
+                    Console.WriteLine(string.Format("AesKey is: {0}", AesKey));
+
+                    //Giel added
+                    //Check if the key from selectedUser is the same as myAes.key
+                    //These need to be the same because myAes.key will be used to encrypt en decrypt the text
+                    string AesKeyUser = System.Text.Encoding.UTF8.GetString(selectedUser.getKeyAesByte());
+                    Console.WriteLine(string.Format("AesKeyUser is: {0}", AesKeyUser));
 
                     // Encrypt the string to an array of bytes.
-                    byte[] encrypted = EncryptStringToBytes_Aes(original,
+                    byte[] encrypted = SecurityAes.EncryptStringToBytes_Aes(original,
                         myAes.Key, myAes.IV);
 
                     //Giel added
                     //write encrypted text bytes to file
-                    bool writeByteText = ByteArrayToFile(_fileName, encrypted);
-                    Console.WriteLine("Text succefully to file ");
+                    writeByteText = FileUtility.ByteArrayToFile(_fileName, encrypted);
+                    Console.WriteLine("Text succefully written to file ");
 
                     //Giel added
                     //Get the string of the encrypted texts
@@ -55,17 +106,16 @@ namespace BasicSecurity_Crypto_Program
                     //Giel added
                     //Get the bytes from the byte file and place them into encryptedFromFile byte array
                     Console.WriteLine("Reading byte file into memory..");
-                    byte[] encryptedFromFile = ReadByteArrayFromFile(_fileName);
+                    byte[] encryptedFromFile = FileUtility.ReadByteArrayFromFile(_fileName);
                     Console.WriteLine("Success");
 
                     // Decrypt the bytes to a string.
-                    string roundtrip = DecryptStringFromBytes_Aes(encryptedFromFile,
+                    string roundtrip = SecurityAes.DecryptStringFromBytes_Aes(encryptedFromFile,
                      myAes.Key, myAes.IV);
 
                     //Display the original data and the decrypted data.
                     Console.WriteLine("Original:   {0}", original);
-                    Console.WriteLine("Round Trip: {0}", roundtrip);
-                    
+                    Console.WriteLine("Round Trip: {0}", roundtrip);  
                 }
 
             }
@@ -92,12 +142,12 @@ namespace BasicSecurity_Crypto_Program
                     //Pass the data to ENCRYPT, the public key information 
                     //(using RSACryptoServiceProvider.ExportParameters(false),
                     //and a boolean flag specifying no OAEP padding.
-                    encryptedData = RSAEncrypt(dataToEncrypt, RSA.ExportParameters(false), false);
+                    encryptedData = SecurityRSA.RSAEncrypt(dataToEncrypt, RSA.ExportParameters(false), false);
 
                     //Pass the data to DECRYPT, the private key information 
                     //(using RSACryptoServiceProvider.ExportParameters(true),
                     //and a boolean flag specifying no OAEP padding.
-                    decryptedData = RSADecrypt(encryptedData, RSA.ExportParameters(true), false);
+                    decryptedData = SecurityRSA.RSADecrypt(encryptedData, RSA.ExportParameters(true), false);
 
                     //Display the decrypted plaintext to the console. 
                     Console.WriteLine("Decrypted plaintext: {0}", ByteConverter.GetString(decryptedData));
@@ -111,189 +161,6 @@ namespace BasicSecurity_Crypto_Program
 
             }
             Console.ReadKey();
-        }
-
-        // AES encryption
-        static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
-        {
-            // Check arguments.
-            if (plainText == null || plainText.Length <= 0)
-                throw new ArgumentNullException("plainText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
-            byte[] encrypted;
-            // Create an Aes object
-            // with the specified key and IV.
-            using (Aes aesAlg = Aes.Create())
-            {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
-
-                // Create a decrytor to perform the stream transform.
-                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for encryption.
-                using (MemoryStream msEncrypt = new MemoryStream())
-                {
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                        {
-
-                            //Write all data to the stream.
-                            swEncrypt.Write(plainText);
-                        }
-                        encrypted = msEncrypt.ToArray();
-                    }
-                }
-            }
-
-
-            // Return the encrypted bytes from the memory stream.
-            return encrypted;
-
-        }
-        static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
-        {
-            // Check arguments.
-            if (cipherText == null || cipherText.Length <= 0)
-                throw new ArgumentNullException("cipherText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
-
-            // Declare the string used to hold
-            // the decrypted text.
-            string plaintext = null;
-
-            // Create an Aes object
-            // with the specified key and IV.
-            using (Aes aesAlg = Aes.Create())
-            {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
-
-                // Create a decrytor to perform the stream transform.
-                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for decryption.
-                using (MemoryStream msDecrypt = new MemoryStream(cipherText))
-                {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
-                            
-                            // and place them in a string.
-                            plaintext = srDecrypt.ReadToEnd();
-                        }
-                    }
-                }
-
-            }
-
-            return plaintext;
-        }
-
-        // RSA Encryption
-        static public byte[] RSAEncrypt(byte[] DataToEncrypt, RSAParameters RSAKeyInfo, bool DoOAEPPadding)
-        {
-            try
-            {
-                byte[] encryptedData;
-                //Create a new instance of RSACryptoServiceProvider.
-                using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
-                {
-
-                    //Import the RSA Key information. This only needs
-                    //toinclude the public key information.
-                    RSA.ImportParameters(RSAKeyInfo);
-
-                    //Encrypt the passed byte array and specify OAEP padding.  
-                    //OAEP padding is only available on Microsoft Windows XP or
-                    //later.  
-                    encryptedData = RSA.Encrypt(DataToEncrypt, DoOAEPPadding);
-                }
-                return encryptedData;
-            }
-            //Catch and display a CryptographicException  
-            //to the console.
-            catch (CryptographicException e)
-            {
-                Console.WriteLine(e.Message);
-
-                return null;
-            }
-
-        }
-
-        static public byte[] RSADecrypt(byte[] DataToDecrypt, RSAParameters RSAKeyInfo, bool DoOAEPPadding)
-        {
-            try
-            {
-                byte[] decryptedData;
-                //Create a new instance of RSACryptoServiceProvider.
-                using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
-                {
-                    //Import the RSA Key information. This needs
-                    //to include the private key information.
-                    RSA.ImportParameters(RSAKeyInfo);
-
-                    //Decrypt the passed byte array and specify OAEP padding.  
-                    //OAEP padding is only available on Microsoft Windows XP or
-                    //later.  
-                    decryptedData = RSA.Decrypt(DataToDecrypt, DoOAEPPadding);
-                }
-                return decryptedData;
-            }
-            //Catch and display a CryptographicException  
-            //to the console.
-            catch (CryptographicException e)
-            {
-                Console.WriteLine(e.ToString());
-
-                return null;
-            }
-
-        }
-
-        // write bytes to a file
-        public static bool ByteArrayToFile(string _FileName, byte[] _ByteArray)
-        {
-            try
-            {
-                // Open file for reading
-                System.IO.FileStream _FileStream =
-                   new System.IO.FileStream(_FileName, System.IO.FileMode.Create,
-                                            System.IO.FileAccess.Write);
-                // Writes a block of bytes to this stream using data from
-                // a byte array.
-                _FileStream.Write(_ByteArray, 0, _ByteArray.Length);
-
-                // close file stream
-                _FileStream.Close();
-
-                return true;
-            }
-            catch (Exception _Exception)
-            {
-                // Error
-                Console.WriteLine("Exception caught in process: {0}",
-                                  _Exception.ToString());
-            }
-
-            // error occured, return false
-            return false;
-        }
-
-        public static byte[] ReadByteArrayFromFile(String _FileName)
-        {
-            //byte[] buff = null;
-            
-            return File.ReadAllBytes(_FileName); 
-        }
+        }  
     }
 }

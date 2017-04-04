@@ -18,6 +18,12 @@ namespace BasicSecurity_Crypto_Program
             this._userName = userName;
         }
 
+        public User(string userName, byte[] KeyAes)
+        {
+            this._userName = userName;
+            this._KeyAes = KeyAes;
+        }
+
         public void setKeyAesByte(byte[] key)
         {
             this._KeyAes = key;
