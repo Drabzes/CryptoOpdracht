@@ -19,25 +19,67 @@ namespace BasicSecurity_Crypto_Program
             //Try aes encryption
             try
             {
-                
+                bool writeByteText = false;
                 string original = "Here is some data to encrypt! AES";
                 Console.WriteLine("In try of Aes");
+                User selectedUser = null;
+
+                Console.WriteLine("Enter userName:"); // Prompt
+                string line = Console.ReadLine(); // Get string from user
+
                 // Create a new instance of the Aes
                 // class.  This generates a new key and initialization 
                 // vector (IV).
                 using (Aes myAes = Aes.Create())
                 {
-                    string _fileName = "AesStringByteFile";
-                    //Giel added
-                    //Convert AesKey bytes to a string
-                    User Giel = new User("Giel", myAes.Key);
-                    //Giel.setKeyAesByte(myAes.Key);
-                    string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
+                    Console.WriteLine("Loading UserData..");
+                    string _fileName;
 
                     //Giel added
-                    //get converted bytes key from User Giel
-                    //Write in in the console for tests
-                    Console.WriteLine("Encrypted Aeskey: " + Giel.getAesStringkey());
+                    //Get the fileName of the selected user his AOSkey.
+                    _fileName = string.Format("{0}-AOSKey", line);
+
+                    //Giel added
+                    //Look for a file named Giel-AOSKey
+                    //If file is found don't make a new key for User
+                    if (CheckFileExist(_fileName))
+                    {
+                        Console.WriteLine("AOSKey found!");
+                        byte[] AOSKey = ReadByteArrayFromFile(_fileName);
+                        selectedUser = new User(line, AOSKey);
+                        Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
+                    }
+                    else
+                    {
+                        //Giel added
+                        //Convert AesKey bytes to a string
+                        User Giel = new User("Giel", myAes.Key);
+
+                        //Giel.setKeyAesByte(myAes.Key);
+                        string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
+
+                        //Giel added
+                        //Create file with private key for Giel.
+                        //Filename = "userName"-AOSKey.bit
+                        string _nameFilePrivateKey = string.Format("{0}-AOSKey", Giel.getUserName());
+                        if (ByteArrayToFile(_nameFilePrivateKey, myAes.Key) == true)
+                        {
+                            Console.WriteLine("Key saved");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Something went wrong saving the key");
+                        }
+
+                        //Giel added
+                        //get converted bytes key from User Giel
+                        //Write in in the console for tests
+                        Console.WriteLine("Encrypted Aeskey: " + Giel.getAesStringkey());
+                    }
+
+                    _fileName = "AesStringByteFile";
+
+                    
 
                     // Encrypt the string to an array of bytes.
                     byte[] encrypted = EncryptStringToBytes_Aes(original,
@@ -45,8 +87,8 @@ namespace BasicSecurity_Crypto_Program
 
                     //Giel added
                     //write encrypted text bytes to file
-                    bool writeByteText = ByteArrayToFile(_fileName, encrypted);
-                    Console.WriteLine("Text succefully to file ");
+                    writeByteText = ByteArrayToFile(_fileName, encrypted);
+                    Console.WriteLine("Text succefully writen to file ");
 
                     //Giel added
                     //Get the string of the encrypted texts
@@ -290,11 +332,20 @@ namespace BasicSecurity_Crypto_Program
             return false;
         }
 
+        //Giel added
+        //Read a byte file and get the value from it in byte[]
         public static byte[] ReadByteArrayFromFile(String _FileName)
         {
             //byte[] buff = null;
             
             return File.ReadAllBytes(_FileName); 
+        }
+
+        //Giel added
+        //Check if file exists.
+        public static bool CheckFileExist(string fileName)
+        {
+            return File.Exists(fileName); ;
         }
     }
 }
