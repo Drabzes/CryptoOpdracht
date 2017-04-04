@@ -15,9 +15,6 @@ namespace BasicSecurity_Crypto_Program
         static void Main(string[] args)
         {
             Console.WriteLine("Test Aes and AOS");
-            //User Giel = new User("Giel");
-            
-
             //Try aes encryption
             try
             {
@@ -52,18 +49,15 @@ namespace BasicSecurity_Crypto_Program
                         //Create user with selected name and loaded key and place it in the memory.
                         selectedUser = new User(line, AOSKey);
                         Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
-                        
-                        
                     }
                     else
                     {
                         Console.WriteLine("AOSKey was not found!");
                         Console.WriteLine("Using default user Giel");
-                        //Giel added
+                        
                         //Convert AesKey bytes to a string
                         selectedUser = new User("Giel", myAes.Key);
 
-                        //Giel added
                         //Create file with private key for Giel.
                         //Filename = "userName"-AOSKey.bit
                         string _nameFilePrivateKey = string.Format("{0}-AOSKey", selectedUser.getUserName());
@@ -76,7 +70,6 @@ namespace BasicSecurity_Crypto_Program
                             Console.WriteLine("Something went wrong saving the key");
                         }
 
-                        //Giel added
                         //get converted bytes key from User Giel
                         //Write in in the console for tests
                         Console.WriteLine("Encrypted Aeskey: " + selectedUser.getAesStringkey());
@@ -122,8 +115,7 @@ namespace BasicSecurity_Crypto_Program
 
                     //Display the original data and the decrypted data.
                     Console.WriteLine("Original:   {0}", original);
-                    Console.WriteLine("Round Trip: {0}", roundtrip);
-                    
+                    Console.WriteLine("Round Trip: {0}", roundtrip);  
                 }
 
             }
@@ -169,8 +161,6 @@ namespace BasicSecurity_Crypto_Program
 
             }
             Console.ReadKey();
-        }
-
-        
+        }  
     }
 }
