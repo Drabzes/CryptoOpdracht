@@ -24,7 +24,7 @@ namespace BasicSecurity_Crypto_Program
                 Console.WriteLine("In try of Aes");
                 User selectedUser = null;
 
-                Console.WriteLine("Enter userName:"); // Prompt
+                Console.Write("Enter userName:  "); // Prompt
                 string line = Console.ReadLine(); // Get string from user
 
                 // Create a new instance of the Aes
@@ -45,23 +45,26 @@ namespace BasicSecurity_Crypto_Program
                     if (CheckFileExist(_fileName))
                     {
                         Console.WriteLine("AOSKey found!");
+                        //Read file with the AesKey into memory
                         byte[] AOSKey = ReadByteArrayFromFile(_fileName);
+                        //Create user with selected name and loaded key and place it in the memory.
                         selectedUser = new User(line, AOSKey);
                         Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
+                        
+                        
                     }
                     else
                     {
+                        Console.WriteLine("AOSKey was not found!");
+                        Console.WriteLine("Using default user Giel");
                         //Giel added
                         //Convert AesKey bytes to a string
-                        User Giel = new User("Giel", myAes.Key);
-
-                        //Giel.setKeyAesByte(myAes.Key);
-                        string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
+                        selectedUser = new User("Giel", myAes.Key);
 
                         //Giel added
                         //Create file with private key for Giel.
                         //Filename = "userName"-AOSKey.bit
-                        string _nameFilePrivateKey = string.Format("{0}-AOSKey", Giel.getUserName());
+                        string _nameFilePrivateKey = string.Format("{0}-AOSKey", selectedUser.getUserName());
                         if (ByteArrayToFile(_nameFilePrivateKey, myAes.Key) == true)
                         {
                             Console.WriteLine("Key saved");
@@ -74,12 +77,22 @@ namespace BasicSecurity_Crypto_Program
                         //Giel added
                         //get converted bytes key from User Giel
                         //Write in in the console for tests
-                        Console.WriteLine("Encrypted Aeskey: " + Giel.getAesStringkey());
+                        Console.WriteLine("Encrypted Aeskey: " + selectedUser.getAesStringkey());
                     }
 
                     _fileName = "AesStringByteFile";
 
-                    
+                    //Giel added
+                    //Load the Aeskey from the user into myAes.key
+                    myAes.Key = selectedUser.getKeyAesByte();
+                    string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
+                    Console.WriteLine(string.Format("AesKey is: {0}", AesKey));
+
+                    //Giel added
+                    //Check if the key from selectedUser is the same as myAes.key
+                    //These need to be the same because myAes.key will be used to encrypt en decrypt the text
+                    string AesKeyUser = System.Text.Encoding.UTF8.GetString(selectedUser.getKeyAesByte());
+                    Console.WriteLine(string.Format("AesKeyUser is: {0}", AesKeyUser));
 
                     // Encrypt the string to an array of bytes.
                     byte[] encrypted = EncryptStringToBytes_Aes(original,
@@ -88,7 +101,7 @@ namespace BasicSecurity_Crypto_Program
                     //Giel added
                     //write encrypted text bytes to file
                     writeByteText = ByteArrayToFile(_fileName, encrypted);
-                    Console.WriteLine("Text succefully writen to file ");
+                    Console.WriteLine("Text succefully written to file ");
 
                     //Giel added
                     //Get the string of the encrypted texts
