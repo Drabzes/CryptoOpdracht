@@ -1,4 +1,5 @@
 ﻿using BasicSecurity_Crypto_Program.Cryptos;
+using BasicSecurity_Crypto_Program.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,11 +44,11 @@ namespace BasicSecurity_Crypto_Program
                     //Giel added
                     //Look for a file named Giel-AOSKey
                     //If file is found don't make a new key for User
-                    if (CheckFileExist(_fileName))
+                    if (FileUtility.CheckFileExist(_fileName))
                     {
                         Console.WriteLine("AOSKey found!");
                         //Read file with the AesKey into memory
-                        byte[] AOSKey = ReadByteArrayFromFile(_fileName);
+                        byte[] AOSKey = FileUtility.ReadByteArrayFromFile(_fileName);
                         //Create user with selected name and loaded key and place it in the memory.
                         selectedUser = new User(line, AOSKey);
                         Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
@@ -66,7 +67,7 @@ namespace BasicSecurity_Crypto_Program
                         //Create file with private key for Giel.
                         //Filename = "userName"-AOSKey.bit
                         string _nameFilePrivateKey = string.Format("{0}-AOSKey", selectedUser.getUserName());
-                        if (ByteArrayToFile(_nameFilePrivateKey, myAes.Key) == true)
+                        if (FileUtility.ByteArrayToFile(_nameFilePrivateKey, myAes.Key) == true)
                         {
                             Console.WriteLine("Key saved");
                         }
@@ -101,7 +102,7 @@ namespace BasicSecurity_Crypto_Program
 
                     //Giel added
                     //write encrypted text bytes to file
-                    writeByteText = ByteArrayToFile(_fileName, encrypted);
+                    writeByteText = FileUtility.ByteArrayToFile(_fileName, encrypted);
                     Console.WriteLine("Text succefully written to file ");
 
                     //Giel added
@@ -112,7 +113,7 @@ namespace BasicSecurity_Crypto_Program
                     //Giel added
                     //Get the bytes from the byte file and place them into encryptedFromFile byte array
                     Console.WriteLine("Reading byte file into memory..");
-                    byte[] encryptedFromFile = ReadByteArrayFromFile(_fileName);
+                    byte[] encryptedFromFile = FileUtility.ReadByteArrayFromFile(_fileName);
                     Console.WriteLine("Success");
 
                     // Decrypt the bytes to a string.
@@ -171,52 +172,5 @@ namespace BasicSecurity_Crypto_Program
         }
 
         
-
-        
-
-        // write bytes to a file
-        public static bool ByteArrayToFile(string _FileName, byte[] _ByteArray)
-        {
-            try
-            {
-                // Open file for reading
-                System.IO.FileStream _FileStream =
-                   new System.IO.FileStream(_FileName, System.IO.FileMode.Create,
-                                            System.IO.FileAccess.Write);
-                // Writes a block of bytes to this stream using data from
-                // a byte array.
-                _FileStream.Write(_ByteArray, 0, _ByteArray.Length);
-
-                // close file stream
-                _FileStream.Close();
-
-                return true;
-            }
-            catch (Exception _Exception)
-            {
-                // Error
-                Console.WriteLine("Exception caught in process: {0}",
-                                  _Exception.ToString());
-            }
-
-            // error occured, return false
-            return false;
-        }
-
-        //Giel added
-        //Read a byte file and get the value from it in byte[]
-        public static byte[] ReadByteArrayFromFile(String _FileName)
-        {
-            //byte[] buff = null;
-            
-            return File.ReadAllBytes(_FileName); 
-        }
-
-        //Giel added
-        //Check if file exists.
-        public static bool CheckFileExist(string fileName)
-        {
-            return File.Exists(fileName); ;
-        }
     }
 }
