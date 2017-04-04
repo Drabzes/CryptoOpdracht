@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BasicSecurity_Crypto_Program.Cryptos;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -95,7 +96,7 @@ namespace BasicSecurity_Crypto_Program
                     Console.WriteLine(string.Format("AesKeyUser is: {0}", AesKeyUser));
 
                     // Encrypt the string to an array of bytes.
-                    byte[] encrypted = EncryptStringToBytes_Aes(original,
+                    byte[] encrypted = SecurityAes.EncryptStringToBytes_Aes(original,
                         myAes.Key, myAes.IV);
 
                     //Giel added
@@ -115,7 +116,7 @@ namespace BasicSecurity_Crypto_Program
                     Console.WriteLine("Success");
 
                     // Decrypt the bytes to a string.
-                    string roundtrip = DecryptStringFromBytes_Aes(encryptedFromFile,
+                    string roundtrip = SecurityAes.DecryptStringFromBytes_Aes(encryptedFromFile,
                      myAes.Key, myAes.IV);
 
                     //Display the original data and the decrypted data.
@@ -148,12 +149,12 @@ namespace BasicSecurity_Crypto_Program
                     //Pass the data to ENCRYPT, the public key information 
                     //(using RSACryptoServiceProvider.ExportParameters(false),
                     //and a boolean flag specifying no OAEP padding.
-                    encryptedData = RSAEncrypt(dataToEncrypt, RSA.ExportParameters(false), false);
+                    encryptedData = SecurityRSA.RSAEncrypt(dataToEncrypt, RSA.ExportParameters(false), false);
 
                     //Pass the data to DECRYPT, the private key information 
                     //(using RSACryptoServiceProvider.ExportParameters(true),
                     //and a boolean flag specifying no OAEP padding.
-                    decryptedData = RSADecrypt(encryptedData, RSA.ExportParameters(true), false);
+                    decryptedData = SecurityRSA.RSADecrypt(encryptedData, RSA.ExportParameters(true), false);
 
                     //Display the decrypted plaintext to the console. 
                     Console.WriteLine("Decrypted plaintext: {0}", ByteConverter.GetString(decryptedData));
@@ -169,152 +170,9 @@ namespace BasicSecurity_Crypto_Program
             Console.ReadKey();
         }
 
-        // AES encryption
-        static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
-        {
-            // Check arguments.
-            if (plainText == null || plainText.Length <= 0)
-                throw new ArgumentNullException("plainText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
-            byte[] encrypted;
-            // Create an Aes object
-            // with the specified key and IV.
-            using (Aes aesAlg = Aes.Create())
-            {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
+        
 
-                // Create a decrytor to perform the stream transform.
-                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for encryption.
-                using (MemoryStream msEncrypt = new MemoryStream())
-                {
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                        {
-
-                            //Write all data to the stream.
-                            swEncrypt.Write(plainText);
-                        }
-                        encrypted = msEncrypt.ToArray();
-                    }
-                }
-            }
-
-
-            // Return the encrypted bytes from the memory stream.
-            return encrypted;
-
-        }
-        static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
-        {
-            // Check arguments.
-            if (cipherText == null || cipherText.Length <= 0)
-                throw new ArgumentNullException("cipherText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
-
-            // Declare the string used to hold
-            // the decrypted text.
-            string plaintext = null;
-
-            // Create an Aes object
-            // with the specified key and IV.
-            using (Aes aesAlg = Aes.Create())
-            {
-                aesAlg.Key = Key;
-                aesAlg.IV = IV;
-
-                // Create a decrytor to perform the stream transform.
-                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for decryption.
-                using (MemoryStream msDecrypt = new MemoryStream(cipherText))
-                {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
-                            
-                            // and place them in a string.
-                            plaintext = srDecrypt.ReadToEnd();
-                        }
-                    }
-                }
-
-            }
-
-            return plaintext;
-        }
-
-        // RSA Encryption
-        static public byte[] RSAEncrypt(byte[] DataToEncrypt, RSAParameters RSAKeyInfo, bool DoOAEPPadding)
-        {
-            try
-            {
-                byte[] encryptedData;
-                //Create a new instance of RSACryptoServiceProvider.
-                using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
-                {
-
-                    //Import the RSA Key information. This only needs
-                    //toinclude the public key information.
-                    RSA.ImportParameters(RSAKeyInfo);
-
-                    //Encrypt the passed byte array and specify OAEP padding.  
-                    //OAEP padding is only available on Microsoft Windows XP or
-                    //later.  
-                    encryptedData = RSA.Encrypt(DataToEncrypt, DoOAEPPadding);
-                }
-                return encryptedData;
-            }
-            //Catch and display a CryptographicException  
-            //to the console.
-            catch (CryptographicException e)
-            {
-                Console.WriteLine(e.Message);
-
-                return null;
-            }
-
-        }
-
-        static public byte[] RSADecrypt(byte[] DataToDecrypt, RSAParameters RSAKeyInfo, bool DoOAEPPadding)
-        {
-            try
-            {
-                byte[] decryptedData;
-                //Create a new instance of RSACryptoServiceProvider.
-                using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
-                {
-                    //Import the RSA Key information. This needs
-                    //to include the private key information.
-                    RSA.ImportParameters(RSAKeyInfo);
-
-                    //Decrypt the passed byte array and specify OAEP padding.  
-                    //OAEP padding is only available on Microsoft Windows XP or
-                    //later.  
-                    decryptedData = RSA.Decrypt(DataToDecrypt, DoOAEPPadding);
-                }
-                return decryptedData;
-            }
-            //Catch and display a CryptographicException  
-            //to the console.
-            catch (CryptographicException e)
-            {
-                Console.WriteLine(e.ToString());
-
-                return null;
-            }
-
-        }
+        
 
         // write bytes to a file
         public static bool ByteArrayToFile(string _FileName, byte[] _ByteArray)

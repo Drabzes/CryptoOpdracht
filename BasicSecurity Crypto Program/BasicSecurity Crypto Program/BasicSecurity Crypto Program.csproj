@@ -43,8 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cryptos\SecurityRSA.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Cryptos\SecurityAes.cs" />
     <Compile Include="User\User.cs" />
   </ItemGroup>
   <ItemGroup>
