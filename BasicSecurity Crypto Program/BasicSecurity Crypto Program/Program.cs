@@ -138,6 +138,40 @@ namespace BasicSecurity_Crypto_Program
                 //public and private key data.
                 using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
                 {
+                    //Get the RSA public in in xml from.
+                    string publicKey = RSA.ToXmlString(false);
+                    //Convert RSA public key string into bytes Array
+                    byte[] publicKeyBytes = ByteConverter.GetBytes(publicKey);
+                    //We name the file here where we want to put the public key in.
+                    string fileName = "RSAPublicKey";
+
+                    //Display the public key to check if it is still the same.
+                    Console.WriteLine("xml form of the public key");
+                    Console.WriteLine(publicKey);
+                    Console.WriteLine("");
+
+                    //Write the public key in bytes into a file.
+                    Console.WriteLine("Creating public key file");
+                    //Write the public key into a file
+                    FileUtility.ByteArrayToFile(fileName, publicKeyBytes);
+                    Console.WriteLine("Public ket file Created. Yay!!");
+
+                    //Check if file exists
+                    Console.WriteLine(string.Format("Check if file exists: {0}",FileUtility.CheckFileExist(fileName)));
+
+                    Console.WriteLine(string.Format("Read file {0}", fileName));
+                    //ReadFile
+                    if (FileUtility.CheckFileExist(fileName) == true)
+                    {
+                        //read the file and put it into a byte[]
+                        publicKeyBytes = FileUtility.ReadByteArrayFromFile(fileName);
+                        //convert the byte[] to a string
+                        publicKey = System.Text.Encoding.UTF8.GetString(publicKeyBytes);
+                        //show the string
+                        Console.WriteLine("The public key from the file is: ");
+                        publicKey.Trim();
+                        Console.WriteLine(publicKey);
+                    }
 
                     //Pass the data to ENCRYPT, the public key information 
                     //(using RSACryptoServiceProvider.ExportParameters(false),
