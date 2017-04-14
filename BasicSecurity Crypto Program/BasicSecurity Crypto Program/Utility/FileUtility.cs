@@ -47,6 +47,25 @@ namespace BasicSecurity_Crypto_Program.Utility
             return File.ReadAllBytes(_FileName);
         }
 
+        public static byte[] ReadByteArrayFromFileRSA(String _FileName)
+        {
+            byte[] UnTrimmed = File.ReadAllBytes(_FileName);
+            byte[] Trimmed = new byte[UnTrimmed.Length];
+            int i = 0;
+
+            foreach(byte bit in UnTrimmed)
+            {
+                if (bit != 0)
+                {
+                    Trimmed[i] = bit;
+                    i++;
+                }
+                
+            }
+
+            return Trimmed;
+        }
+
         //Giel added
         //Check if file exists.
         public static bool CheckFileExist(string fileName)

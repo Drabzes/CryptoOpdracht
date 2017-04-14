@@ -164,7 +164,7 @@ namespace BasicSecurity_Crypto_Program
                     if (FileUtility.CheckFileExist(fileName) == true)
                     {
                         //read the file and put it into a byte[]
-                        publicKeyBytes = FileUtility.ReadByteArrayFromFile(fileName);
+                        publicKeyBytes = FileUtility.ReadByteArrayFromFileRSA(fileName);
                         //convert the byte[] to a string
                         publicKey = System.Text.Encoding.UTF8.GetString(publicKeyBytes);
                         //show the string
