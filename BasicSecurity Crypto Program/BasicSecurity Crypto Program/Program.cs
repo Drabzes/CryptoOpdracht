@@ -14,7 +14,44 @@ namespace BasicSecurity_Crypto_Program
     {
         static void Main(string[] args)
         {
+
+            Boolean exit = false; 
+
+            //Opvragen username
+            Console.Write("Username: ");
+            //Username opslaan in de variabele username 
+            string username = Console.ReadLine();
+            //Opvragen wachtwoord
+            Console.Write("Password: ");
+            //Wachtwoord opslaan in de variabele password
+            string password = Console.ReadLine();
+            //Laat de gebruiker een keuze welk soort encryption gebruikt moet worden 
+            while(!exit)
+            {
+                Console.WriteLine("Choose your encryption type : \n 1 : AES \n 2 : RSA");
+                int option = Convert.ToInt32(Console.ReadLine());
+                switch (option)
+                {
+                    case 1:
+                        Console.WriteLine("You choose AES");
+                        exit = true;
+                        break;
+                    case 2:
+                        Console.WriteLine("You choose RSA");
+                        exit = true;
+                        break;
+                }
+            }
+
+            //Keuzes geven aan de gebruiker 
+
+
             Console.WriteLine("Test Aes and AOS");
+<<<<<<< HEAD
+=======
+            User Giel = new User("Giel");
+
+>>>>>>> JorisBranch
             //Try aes encryption
             try
             {

@@ -4,6 +4,7 @@ C:\Users\Jafar\Documents\GitHub\BasicSecurity Crypto Program\BasicSecurity Crypt
 C:\Users\Jafar\Documents\GitHub\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.csprojResolveAssemblyReference.cache
 C:\Users\Jafar\Documents\GitHub\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.exe
 C:\Users\Jafar\Documents\GitHub\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.pdb
+<<<<<<< HEAD
 C:\Users\Jafar\Documents\GitHub\Crypto\BasicSecurity Crypto Program\BasicSecurity Crypto Program\bin\Debug\BasicSecurity Crypto Program.exe.config
 C:\Users\Jafar\Documents\GitHub\Crypto\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.exe
 C:\Users\Jafar\Documents\GitHub\Crypto\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.pdb
@@ -16,3 +17,11 @@ C:\Users\Titaantje\Documents\GitHub\CryptoOpdracht\BasicSecurity Crypto Program\
 C:\Users\Titaantje\Documents\GitHub\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.csprojResolveAssemblyReference.cache
 C:\Users\Titaantje\Documents\GitHub\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\bin\Debug\BasicSecurity Crypto Program.exe
 C:\Users\Titaantje\Documents\GitHub\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\bin\Debug\BasicSecurity Crypto Program.pdb
+=======
+C:\Users\11502206\Documents\School\2de Jaar\Basic Security\BasicSecurityProject\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\bin\Debug\BasicSecurity Crypto Program.exe.config
+C:\Users\11502206\Documents\School\2de Jaar\Basic Security\BasicSecurityProject\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.exe
+C:\Users\11502206\Documents\School\2de Jaar\Basic Security\BasicSecurityProject\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.pdb
+C:\Users\11502206\Documents\School\2de Jaar\Basic Security\BasicSecurityProject\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\bin\Debug\BasicSecurity Crypto Program.exe
+C:\Users\11502206\Documents\School\2de Jaar\Basic Security\BasicSecurityProject\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\bin\Debug\BasicSecurity Crypto Program.pdb
+C:\Users\11502206\Documents\School\2de Jaar\Basic Security\BasicSecurityProject\CryptoOpdracht\BasicSecurity Crypto Program\BasicSecurity Crypto Program\obj\Debug\BasicSecurity Crypto Program.csprojResolveAssemblyReference.cache
+>>>>>>> JorisBranch
