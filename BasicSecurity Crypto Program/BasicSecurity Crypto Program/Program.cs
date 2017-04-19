@@ -15,13 +15,14 @@ namespace BasicSecurity_Crypto_Program
         static void Main(string[] args)
         {
             Console.WriteLine("Test Aes and AOS");
+            User selectedUser = null;
             //Try aes encryption
             try
             {
                 bool writeByteText = false;
                 string original = "Here is some data to encrypt! AES";
                 Console.WriteLine("In try of Aes");
-                User selectedUser = null;
+                
 
                 Console.Write("Enter userName:  "); // Prompt
                 string line = Console.ReadLine(); // Get string from user
@@ -143,7 +144,7 @@ namespace BasicSecurity_Crypto_Program
                     //Convert RSA public key string into bytes Array
                     byte[] publicKeyBytes = ByteConverter.GetBytes(publicKey);
                     //We name the file here where we want to put the public key in.
-                    string fileName = "RSAPublicKey";
+                    string fileName = string.Format("RSAPublicKey-{0}", selectedUser.getUserName());
 
                     //Display the public key to check if it is still the same.
                     Console.WriteLine("xml form of the public key");
@@ -185,6 +186,23 @@ namespace BasicSecurity_Crypto_Program
 
                     //Display the decrypted plaintext to the console. 
                     Console.WriteLine("Decrypted plaintext: {0}", ByteConverter.GetString(decryptedData));
+
+                    string md5string = SecurityHash.CalculateMD5Hash("TestTekst");
+
+                    MD5 md5 = System.Security.Cryptography.MD5.Create();
+
+                    byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes("testtext");
+
+                    byte[] hash = md5.ComputeHash(inputBytes);
+
+                    byte[] singedhash = RSA.SignHash(hash, "MD5");
+
+                    Utility.FileUtility.ByteArrayToFile("singedHash", singedhash);
+
+                    md5string = ByteConverter.GetString(singedhash);
+
+                    Console.WriteLine(string.Format("hash code of testTeskt: {0}", md5string));
+
                 }
             }
             catch (ArgumentNullException)
