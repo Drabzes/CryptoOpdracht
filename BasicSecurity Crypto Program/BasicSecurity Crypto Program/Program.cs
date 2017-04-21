@@ -139,23 +139,23 @@ namespace BasicSecurity_Crypto_Program
                 //public and private key data.
                 using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
                 {
+                    string fileName = null;
                     //Get the RSA public in in xml from.
                     string publicKey = RSA.ToXmlString(false);
+                    string privateKey = RSA.ToXmlString(true);
                     //Convert RSA public key string into bytes Array
                     byte[] publicKeyBytes = ByteConverter.GetBytes(publicKey);
+                    byte[] privateKeyBytes = ByteConverter.GetBytes(privateKey);
+
                     //We name the file here where we want to put the public key in.
-                    string fileName = string.Format("RSAPublicKey-{0}", selectedUser.getUserName());
+                    fileName = string.Format("RSAPublicKey-{0}", selectedUser.getUserName());
 
                     //Display the public key to check if it is still the same.
                     Console.WriteLine("xml form of the public key");
                     Console.WriteLine(publicKey);
                     Console.WriteLine("");
 
-                    //Write the public key in bytes into a file.
-                    Console.WriteLine("Creating public key file");
-                    //Write the public key into a file
-                    FileUtility.ByteArrayToFile(fileName, publicKeyBytes);
-                    Console.WriteLine("Public ket file Created. Yay!!");
+                    
 
                     //Check if file exists
                     Console.WriteLine(string.Format("Check if file exists: {0}",FileUtility.CheckFileExist(fileName)));
@@ -172,6 +172,41 @@ namespace BasicSecurity_Crypto_Program
                         Console.WriteLine("The public key from the file is: ");
                         publicKey.Trim();
                         Console.WriteLine(publicKey);
+                    }
+                    else
+                    {
+                        //Write the public key in bytes into a file.
+                        Console.WriteLine("Creating public key file");
+                        //Write the public key into a file
+                        FileUtility.ByteArrayToFile(fileName, publicKeyBytes);
+                        Console.WriteLine("Public ket file Created. Yay!!");
+                    }
+
+                    //change the fileName to private file
+                    fileName = string.Format("RSAPrivateKey-{0}", selectedUser.getUserName());
+
+                    //Check if file exists
+                    Console.WriteLine(string.Format("Check if file exists: {0}", FileUtility.CheckFileExist(fileName)));
+
+                    Console.WriteLine(string.Format("Read file {0}", fileName));
+
+                    if (FileUtility.CheckFileExist(fileName) == true)
+                    {
+                        //read the file and put it into a byte[]
+                        privateKeyBytes = FileUtility.ReadByteArrayFromFileRSA(fileName);
+                        //convert the byte[] to a string
+                        privateKey = System.Text.Encoding.UTF8.GetString(privateKeyBytes);
+                        //show the string
+                        Console.WriteLine("The private key from the file is: ");
+                        privateKey = privateKey.Replace(" ", string.Empty);
+                        Console.WriteLine(privateKey);
+                    }else
+                    {
+                        //Write the public key in bytes into a file.
+                        Console.WriteLine("Creating private key file");
+                        //Write the public key into a file
+                        FileUtility.ByteArrayToFile(fileName, privateKeyBytes);
+                        Console.WriteLine("Private key file Created. Yay!!");
                     }
 
                     //Pass the data to ENCRYPT, the public key information 
