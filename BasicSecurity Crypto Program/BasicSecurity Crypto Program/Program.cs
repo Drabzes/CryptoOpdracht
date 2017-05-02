@@ -167,7 +167,7 @@ namespace BasicSecurity_Crypto_Program
                         //read the file and put it into a byte[]
                         publicKeyBytes = FileUtility.ReadByteArrayFromFileRSA(fileName);
                         //convert the byte[] to a string
-                        publicKey = System.Text.Encoding.UTF8.GetString(publicKeyBytes);
+                        publicKey = ByteConverter.GetString(publicKeyBytes);
                         //show the string
                         Console.WriteLine("The public key from the file is: ");
                         publicKey.Trim();
@@ -195,7 +195,7 @@ namespace BasicSecurity_Crypto_Program
                         //read the file and put it into a byte[]
                         privateKeyBytes = FileUtility.ReadByteArrayFromFileRSA(fileName);
                         //convert the byte[] to a string
-                        privateKey = System.Text.Encoding.UTF8.GetString(privateKeyBytes);
+                        privateKey = Convert.ToBase64String(privateKeyBytes);
                         //show the string
                         Console.WriteLine("The private key from the file is: ");
                         privateKey = privateKey.Replace(" ", string.Empty);
@@ -209,15 +209,31 @@ namespace BasicSecurity_Crypto_Program
                         Console.WriteLine("Private key file Created. Yay!!");
                     }
 
+
+
                     //Pass the data to ENCRYPT, the public key information 
                     //(using RSACryptoServiceProvider.ExportParameters(false),
                     //and a boolean flag specifying no OAEP padding.
-                    encryptedData = SecurityRSA.RSAEncrypt(dataToEncrypt, RSA.ExportParameters(false), false);
+
+                    
+
+                    //encryptedData = SecurityRSA.RSAEncrypt(dataToEncrypt, RSA.ExportParameters(false), false);
+                    RSA.FromXmlString(privateKey);
+
+                    encryptedData = RSA.Decrypt(dataToEncrypt, true);
+
 
                     //Pass the data to DECRYPT, the private key information 
                     //(using RSACryptoServiceProvider.ExportParameters(true),
                     //and a boolean flag specifying no OAEP padding.
-                    decryptedData = SecurityRSA.RSADecrypt(encryptedData, RSA.ExportParameters(true), false);
+
+                    //decryptedData = SecurityRSA.RSADecrypt(encryptedData, RSA.ExportParameters(true), false);
+
+                    TextReader reader = new StreamReader(string.Format("RSAPrivateKey-{0}.xml", selectedUser.getUserName()));
+
+                    RSA.FromXmlString(privateKey);
+
+                    decryptedData = RSA.Decrypt(encryptedData, true);
 
                     //Display the decrypted plaintext to the console. 
                     Console.WriteLine("Decrypted plaintext: {0}", ByteConverter.GetString(decryptedData));

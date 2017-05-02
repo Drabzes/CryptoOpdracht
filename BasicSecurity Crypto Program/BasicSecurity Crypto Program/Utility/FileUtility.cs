@@ -49,10 +49,21 @@ namespace BasicSecurity_Crypto_Program.Utility
 
         public static byte[] ReadByteArrayFromFileRSA(String _FileName)
         {
-            byte[] UnTrimmed = File.ReadAllBytes(_FileName);
-            byte[] Trimmed = new byte[UnTrimmed.Length];
             int i = 0;
+            byte[] UnTrimmed = File.ReadAllBytes(_FileName);
 
+            foreach(byte bit in UnTrimmed)
+            {
+                if (bit != 0)
+                {
+                    i++;
+                }
+            }
+
+
+            byte[] Trimmed = new byte[i];
+
+            i = 0;
             foreach(byte bit in UnTrimmed)
             {
                 if (bit != 0)
