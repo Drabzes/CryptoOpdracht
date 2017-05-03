@@ -10,8 +10,8 @@ namespace BasicSecurity_Crypto_Program
     public class User
     {
         private string _userName;
-        private RSAParameters privKey;
-        private RSAParameters pubKey;
+        private RSAParameters _privKey;
+        private RSAParameters _pubKey;
 
 
         public User(string userName)
@@ -22,8 +22,8 @@ namespace BasicSecurity_Crypto_Program
         public User(string userName,  RSAParameters privKey, RSAParameters pubKey)
         {
             this._userName = userName;
-            this.privKey = privKey;
-            this.pubKey = pubKey;
+            this._privKey = privKey;
+            this._pubKey = pubKey;
         }
         
         public string getUserName()
@@ -31,10 +31,14 @@ namespace BasicSecurity_Crypto_Program
             return _userName;
         }
 
-        public string getAesStringkey()
+        public RSAParameters getPrivKey()
         {
-            string AesKeyString = System.Text.Encoding.UTF8.GetString(this._KeyAes);
-            return AesKeyString;
+            return this._privKey;
+        }
+
+        public RSAParameters getPubKey()
+        {
+            return this._pubKey;
         }
 
     }

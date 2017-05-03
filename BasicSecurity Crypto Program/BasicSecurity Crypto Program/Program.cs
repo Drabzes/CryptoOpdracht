@@ -20,13 +20,67 @@ namespace BasicSecurity_Crypto_Program
             try
             {
                 Console.Write("Enter userName:  "); // Prompt
-                string line = Console.ReadLine(); // Get string from user
+                string _name = Console.ReadLine(); // Get string from user
+                
 
+                selectedUser = loadUser(_name);
 
+                if (!(selectedUser == null))
+                {
+                    
+                    Console.WriteLine(String.Format("Naam persoon: {0}", selectedUser.getUserName()));
+                }
+                else
+                {
+                    Console.WriteLine(String.Format("Could not load user"));
+                    Console.WriteLine(String.Format("Creating user {0}", _name));
+
+                    //lets take a new CSP with a new 2048 bit rsa key pair
+                    RSACryptoServiceProvider csp = new RSACryptoServiceProvider(2048);
+
+                    //how to get the private key
+                    var privKey = csp.ExportParameters(true);
+
+                    //and the public key ...
+                    var pubKey = csp.ExportParameters(false);
+
+                    // user aanmaken
+                    selectedUser = new User(_name, privKey, pubKey);
+
+                    string pubKeyString;
+                    {
+                        //we need some buffer
+                        var sw = new System.IO.StringWriter();
+                        //we need a serializer
+                        var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
+                        //serialize the key into the stream
+                        xs.Serialize(sw, pubKey);
+                        //get the string from the stream
+                        pubKeyString = sw.ToString();
+                    }
+
+                    string privKeyString;
+                    {
+                        //we need some buffer
+                        var sw = new System.IO.StringWriter();
+                        //we need a serializer
+                        var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
+                        //serialize the key into the stream
+                        xs.Serialize(sw, privKey);
+                        //get the string from the stream
+                        privKeyString = sw.ToString();
+                    }
+
+                    Console.WriteLine(String.Format("Saving keys"));
+                    string _nameFile = string.Format("{0}-RSAPrivKey.dat", _name);
+                    saveByte(pubKeyString, _nameFile);
+                    _nameFile = string.Format("{0}-RSAPubKey.dat", _name);
+                    saveByte(privKeyString, _nameFile);
+                }
 
 
                 //aosEncryption(selectedUser);
-                rsaEncryption(selectedUser);
+                //rsaEncryption(selectedUser);
 
             }
             catch (Exception e)
@@ -36,38 +90,62 @@ namespace BasicSecurity_Crypto_Program
             Console.ReadKey();
         }
 
-        public static User loadUser(string name)
+        public static User loadUser(string _name)
         {
-            User selectedUser;
-            string _fileName;
-
-            //Giel added
-
-            _fileName = string.Format("{0}-RSAPrivKey", name);
-            if (FileUtility.CheckFileExist(_fileName))
+            try
             {
-                Console.WriteLine("RSA private Key found!");
-                //Read file with the AesKey into memory
-                byte[] AOSKey = FileUtility.ReadByteArrayFromFile(_fileName);
-                //Create user with selected name and loaded key and place it in the memory.
-                selectedUser = new User(line, AOSKey);
-                Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
-            }
+                User selectedUser;
+                string _fileNamePriv = string.Format("{0}-RSAPrivKey.dat", _name);
+                string _fileNamePub = string.Format("{0}-RSAPubKey.dat", _name);
 
-            return selectedUser;
+                if (FileUtility.CheckFileExist(_fileNamePub) && FileUtility.CheckFileExist(_fileNamePriv))
+                {
+                    //how to get the private key
+                    RSAParameters privKey;
+                    RSAParameters pubKey;
+
+                    //lees keys
+                    string privKeyString = getString(_fileNamePriv);
+                    string pubKeyString = getString(_fileNamePub);
+
+                    //converting it back
+                    {
+                        //get a stream from the string
+                        var sr = new System.IO.StringReader(pubKeyString);
+                        //we need a deserializer
+                        var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
+                        //get the object back from the stream
+                        pubKey = (RSAParameters)xs.Deserialize(sr);
+
+
+                        //get a stream from the string
+                        sr = new System.IO.StringReader(privKeyString);
+                        //we need a deserializer
+                        xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
+                        //get the object back from the stream
+                        privKey = (RSAParameters)xs.Deserialize(sr);
+                    }
+
+                    //Create user with selected name and loaded key and place it in the memory.
+                    selectedUser = new User(_name, privKey, pubKey);
+                    Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
+                    return selectedUser;
+                }
+                return null;
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+            
         }
 
-        public static void aosEncryption(User selectedUser)
+        public static void aosEncryption(User selectedUser, string line)
         {
             bool writeByteText = false;
             string original = "Here is some data to encrypt! AES";
             Console.WriteLine("In try of Aes");
-
-
-
-
             
-
             // Create a new instance of the Aes
             // class.  This generates a new key and initialization 
             // vector (IV).
@@ -89,7 +167,7 @@ namespace BasicSecurity_Crypto_Program
                     //Read file with the AesKey into memory
                     byte[] AOSKey = FileUtility.ReadByteArrayFromFile(_fileName);
                     //Create user with selected name and loaded key and place it in the memory.
-                    selectedUser = new User(line, AOSKey);
+                    //selectedUser = new User(line, AOSKey);
                     Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
                 }
                 else
@@ -98,7 +176,7 @@ namespace BasicSecurity_Crypto_Program
                     Console.WriteLine("Using default user Giel");
 
                     //Convert AesKey bytes to a string
-                    selectedUser = new User("Giel", myAes.Key);
+                    //selectedUser = new User("Giel", myAes.Key);
 
                     //Create file with private key for Giel.
                     //Filename = "userName"-AOSKey.bit
@@ -114,22 +192,22 @@ namespace BasicSecurity_Crypto_Program
 
                     //get converted bytes key from User Giel
                     //Write in in the console for tests
-                    Console.WriteLine("Encrypted Aeskey: " + selectedUser.getAesStringkey());
+                    //Console.WriteLine("Encrypted Aeskey: " + selectedUser.getAesStringkey());
                 }
 
                 _fileName = "AesStringByteFile";
 
                 //Giel added
                 //Load the Aeskey from the user into myAes.key
-                myAes.Key = selectedUser.getKeyAesByte();
+                //myAes.Key = selectedUser.getKeyAesByte();
                 string AesKey = System.Text.Encoding.UTF8.GetString(myAes.Key);
                 Console.WriteLine(string.Format("AesKey is: {0}", AesKey));
 
                 //Giel added
                 //Check if the key from selectedUser is the same as myAes.key
                 //These need to be the same because myAes.key will be used to encrypt en decrypt the text
-                string AesKeyUser = System.Text.Encoding.UTF8.GetString(selectedUser.getKeyAesByte());
-                Console.WriteLine(string.Format("AesKeyUser is: {0}", AesKeyUser));
+               // string AesKeyUser = System.Text.Encoding.UTF8.GetString(selectedUser.getKeyAesByte());
+                //Console.WriteLine(string.Format("AesKeyUser is: {0}", AesKeyUser));
 
                 // Encrypt the string to an array of bytes.
                 byte[] encrypted = SecurityAes.EncryptStringToBytes_Aes(original,
@@ -301,6 +379,21 @@ namespace BasicSecurity_Crypto_Program
                 Console.WriteLine(string.Format("hash code of testTeskt: {0}", md5string));
 
             }
+        }
+
+        private static string getString(string nameFile)
+        {
+            byte[] bytes = File.ReadAllBytes(nameFile);
+            char[] chars = new char[bytes.Length / sizeof(char)];
+            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+            return new string(chars);
+        }
+
+        private static void saveByte(string str, string nameFile)
+        {
+            byte[] bytes = new byte[str.Length * sizeof(char)];
+            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            File.WriteAllBytes(nameFile, bytes);
         }
     }
 }
