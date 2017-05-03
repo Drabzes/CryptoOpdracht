@@ -10,7 +10,8 @@ namespace BasicSecurity_Crypto_Program
     public class User
     {
         private string _userName;
-        private byte[] _KeyAes;
+        private RSAParameters privKey;
+        private RSAParameters pubKey;
 
 
         public User(string userName)
@@ -18,22 +19,13 @@ namespace BasicSecurity_Crypto_Program
             this._userName = userName;
         }
 
-        public User(string userName, byte[] KeyAes)
+        public User(string userName,  RSAParameters privKey, RSAParameters pubKey)
         {
             this._userName = userName;
-            this._KeyAes = KeyAes;
+            this.privKey = privKey;
+            this.pubKey = pubKey;
         }
-
-        public void setKeyAesByte(byte[] key)
-        {
-            this._KeyAes = key;
-        }
-
-        public byte[] getKeyAesByte()
-        {
-            return this._KeyAes;
-        }
-
+        
         public string getUserName()
         {
             return _userName;
