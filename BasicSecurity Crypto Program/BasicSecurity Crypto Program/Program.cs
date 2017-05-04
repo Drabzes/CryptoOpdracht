@@ -99,25 +99,32 @@ namespace BasicSecurity_Crypto_Program
                             break;
                         case 2:
                             //Show a list of all message files
+                            Console.WriteLine("Blaah");
                             loadfileList(_selectedUser);
 
                             Console.Write("select message by number: ");
                             int _fileNumber = Convert.ToInt32(Console.ReadLine());
-                            _messageFile = string.Format("{0}-MessageFile-{1}", _selectedUser.getUserName(), _fileNumber);
-                            _aesKeyFile = string.Format("{0}-EncryptedAesKey-{1}", _selectedUser.getUserName(), _fileNumber);
+                            _messageFile = string.Format("{0}-MessageFile-{1}.dat", _selectedUser.getUserName(), _fileNumber);
+                            _aesKeyFile = string.Format("{0}-EncryptedAesKey-{1}.dat", _selectedUser.getUserName(), _fileNumber);
                             if (FileUtility.CheckFileExist(_messageFile) && FileUtility.CheckFileExist(_aesKeyFile))
                             {
                                 Console.WriteLine("You selected file: {0}", _messageFile);
+                                //select the user that wrote the text to you
                                 Console.Write("Select user: ");
                                 _name = Console.ReadLine();
 
+                                //Read the users keys
                                 _fileNamePriv = string.Format("{0}-RSAPrivKey.dat", _name);
                                 _fileNamePub = string.Format("{0}-RSAPubKey.dat", _name);
+                                //check if those keys exists
                                 if (FileUtility.CheckFileExist(_fileNamePub) && FileUtility.CheckFileExist(_fileNamePriv))
                                 {
+                                    //load the user into the system
                                     _sendUser = loadUser(_name);
 
                                     byte[] aesKeyBytes = decryptFileWithRSA(_aesKeyFile, _selectedUser.getPrivKey());
+                                    var convertedstring = Convert.ToBase64String(aesKeyBytes);
+                                    Console.WriteLine(string.Format("MD5 of aeskey: {0}", CalculateMD5Hash(convertedstring)));
 
                                     string message = decryptMessage(_messageFile, aesKeyBytes);
                                 }
@@ -162,13 +169,13 @@ namespace BasicSecurity_Crypto_Program
 
         private static void loadfileList(User _selectedUser)
         {
-            int fileVersion = 0;
-            string _fileName = string.Format("{0}-MessageFile-{1}", _selectedUser.getUserName(), fileVersion);
+            int fileVersion = 1;
+            string _fileName = string.Format("{0}-MessageFile-{1}.dat", _selectedUser.getUserName(), fileVersion);
             while (FileUtility.CheckFileExist(_fileName))
             {
                 Console.WriteLine(_fileName);
                 fileVersion++;
-                _fileName = string.Format("{0}-MessageFile-{1}", _selectedUser.getUserName(), fileVersion);
+                _fileName = string.Format("{0}-MessageFile-{1}.dat", _selectedUser.getUserName(), fileVersion);
             } 
         }
 
@@ -178,11 +185,13 @@ namespace BasicSecurity_Crypto_Program
             {
                 myAes.Key = aesKeyBytes;
 
+                var test = File.ReadAllBytes(_messageFile);
+
                 string filevalue = getString(_messageFile);
 
                 var encryptedFromFile = System.Text.Encoding.Unicode.GetBytes(filevalue);
 
-                 return SecurityAes.DecryptStringFromBytes_Aes(encryptedFromFile,
+                 return SecurityAes.DecryptStringFromBytes_Aes(test,
                  myAes.Key, myAes.IV);
             }
         }
@@ -227,6 +236,8 @@ namespace BasicSecurity_Crypto_Program
                 //encrypt text with aes key
                 byte[] encrypted = SecurityAes.EncryptStringToBytes_Aes(text,
                     myAes.Key, myAes.IV);
+
+                Console.WriteLine("hulp: " + Convert.ToBase64String(myAes.IV));
                 
                 //add message
                 string _encryptedText = Convert.ToBase64String(encrypted);
@@ -235,37 +246,45 @@ namespace BasicSecurity_Crypto_Program
                 do
                 {
                     fileVersion++;
-                    _fileName = string.Format("{0}-MessageFile-{1}", _user.getUserName(), fileVersion);
+                    _fileName = string.Format("{0}-MessageFile-{1}.dat", _user.getUserName(), fileVersion);
                 } while (FileUtility.CheckFileExist(_fileName));
 
                 //Save encrypted text
-                saveByte(_encryptedText, _fileName);
+                //saveByte(_encryptedText, _fileName);
+                File.WriteAllBytes(_fileName, encrypted);
                 Console.WriteLine(string.Format("Text encrypted and saved as: {0}", _fileName));
 
 
                 //import pubkey to rsa
                 csp = new RSACryptoServiceProvider();
                 csp.ImportParameters(_user.getPubKey());
-                // encrypt aeskey with pub rsakey
+                // encrypt aesKey with pub RSAkey
                 var aesKeyEncrypted = csp.Encrypt(myAes.Key, false);
 
-                string _encryptedAesKey = Convert.ToBase64String(aesKeyEncrypted);
+                //string _encryptedAesKey = Convert.ToBase64String(aesKeyEncrypted);
                 do
                 {
-                    _fileName = string.Format("{0}-EncryptedAesKey-{1}", _user.getUserName(), fileVersion);
+                    _fileName = string.Format("{0}-EncryptedAesKey-{1}.dat", _user.getUserName(), fileVersion);
                 } while (FileUtility.CheckFileExist(_fileName));
 
-                //Save encrypted text
-                saveByte(_encryptedText, _fileName);
+                //Save encrypted aesKey
+                //saveByte(_encryptedAesKey, _fileName);
+                File.WriteAllBytes(_fileName, aesKeyEncrypted);
                 Console.WriteLine(string.Format("AesKey encrypted and saved as: {0}", _fileName));
 
 
+
+                var bytesPlainTextData = FileUtility.ReadByteArrayFromFileRSA(_fileName);
+                var morebytes = getString(_fileName);
+                var conv = System.Text.Encoding.Unicode.GetBytes(morebytes);
+                byte[] buff = File.ReadAllBytes(_fileName);
+
                 csp = new RSACryptoServiceProvider();
                 csp.ImportParameters(_user.getPrivKey());
-                var aeKeydecrypted = csp.Decrypt(aesKeyEncrypted, false);
-
+                var aeKeydecrypted = csp.Decrypt(buff, false);
 
                 var testdata = Convert.ToBase64String(myAes.Key);
+                
                 Console.WriteLine(string.Format("MD5 of aeskey: {0}", CalculateMD5Hash(testdata)));
                 testdata = Convert.ToBase64String(aeKeydecrypted);
                 Console.WriteLine(string.Format("MD5 of aeskeydecrypt: {0}", CalculateMD5Hash(testdata)));
@@ -521,6 +540,13 @@ namespace BasicSecurity_Crypto_Program
             return new string(chars);
         }
 
+        private static byte[] getByteFromFile(string nameFile)
+        {
+            byte[] bytes = File.ReadAllBytes(nameFile);
+            
+            return bytes;
+        }
+
         private static void saveByte(string str, string nameFile)
         {
             byte[] bytes = new byte[str.Length * sizeof(char)];
@@ -566,7 +592,7 @@ namespace BasicSecurity_Crypto_Program
 
             MD5 md5 = System.Security.Cryptography.MD5.Create();
 
-            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+            byte[] inputBytes = Convert.FromBase64String(input);
 
             byte[] hash = md5.ComputeHash(inputBytes);
 
@@ -589,14 +615,20 @@ namespace BasicSecurity_Crypto_Program
 
         private static byte[] decryptFileWithRSA(string _fileName, RSAParameters key)
         {
+            /*
             string plainTextData = getString(_fileName);
 
             var bytesPlainTextData = System.Text.Encoding.Unicode.GetBytes(plainTextData);
+            */
+
+            var rsabytedata = getByteFromFile(_fileName);
 
             var csp = new RSACryptoServiceProvider(2048);
             csp = new RSACryptoServiceProvider();
             csp.ImportParameters(key);
-            return csp.Decrypt(bytesPlainTextData, false);
+
+            var testvalue = csp.Decrypt(rsabytedata, false);
+            return testvalue;
         }
     }
 }
