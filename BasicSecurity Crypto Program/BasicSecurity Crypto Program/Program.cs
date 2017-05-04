@@ -53,9 +53,9 @@ namespace BasicSecurity_Crypto_Program
 
                     Console.WriteLine(String.Format("Saving keys"));
                     string _nameFile = string.Format("{0}-RSAPrivKey.dat", _name);
-                    saveByte(pubKeyString, _nameFile);
-                    _nameFile = string.Format("{0}-RSAPubKey.dat", _name);
                     saveByte(privKeyString, _nameFile);
+                    _nameFile = string.Format("{0}-RSAPubKey.dat", _name);
+                    saveByte(pubKeyString, _nameFile);
                 }
 
 
@@ -81,6 +81,7 @@ namespace BasicSecurity_Crypto_Program
                             {
                                 Console.Write("Message to send: ");
                                 string message = Console.ReadLine();
+                                aosEncryption1(message, selectedUser.getPubKey(), selectedUser.getPrivKey());
                             }
                             else
                             {
@@ -150,6 +151,28 @@ namespace BasicSecurity_Crypto_Program
                 return null;
             }
             
+        }
+
+        private static void aosEncryption1 (string text, RSAParameters pubKey, RSAParameters privKey)
+        {
+            var csp = new RSACryptoServiceProvider(2048);
+            using (Aes myAes = Aes.Create())
+            {
+                //encrypt text with aes key
+                byte[] encrypted = SecurityAes.EncryptStringToBytes_Aes(text,
+                    myAes.Key, myAes.IV);
+                var testdata = Convert.ToBase64String(myAes.Key);
+                Console.WriteLine(string.Format("MD5 of aeskey: {0}",CalculateMD5Hash(testdata)));
+                //import pubkey to rsa
+                csp.ImportParameters(pubKey);
+                // encrypt aeskey with pub rsakey
+                var aesKeyEncrypted = csp.Encrypt(myAes.Key, false);
+                csp = new RSACryptoServiceProvider();
+                csp.ImportParameters(privKey);
+                var aeKeydecrypted = csp.Decrypt(aesKeyEncrypted, false);
+                testdata = Convert.ToBase64String(aeKeydecrypted);
+                Console.WriteLine(string.Format("MD5 of aeskeydecrypt: {0}", CalculateMD5Hash(testdata)));
+            }
         }
 
         public static void aosEncryption(User selectedUser, string line)
@@ -436,6 +459,35 @@ namespace BasicSecurity_Crypto_Program
             key = (RSAParameters)xs.Deserialize(sr);
 
             return key;
+        }
+
+        public static string CalculateMD5Hash(string input)
+
+        {
+
+            // step 1, calculate MD5 hash from input
+
+            MD5 md5 = System.Security.Cryptography.MD5.Create();
+
+            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+
+            byte[] hash = md5.ComputeHash(inputBytes);
+
+
+            // step 2, convert byte array to hex string
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < hash.Length; i++)
+
+            {
+
+                sb.Append(hash[i].ToString("X2"));
+
+            }
+
+            return sb.ToString();
+
         }
     }
 }
