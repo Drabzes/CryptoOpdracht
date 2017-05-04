@@ -47,29 +47,9 @@ namespace BasicSecurity_Crypto_Program
                     // user aanmaken
                     selectedUser = new User(_name, privKey, pubKey);
 
-                    string pubKeyString;
-                    {
-                        //we need some buffer
-                        var sw = new System.IO.StringWriter();
-                        //we need a serializer
-                        var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
-                        //serialize the key into the stream
-                        xs.Serialize(sw, pubKey);
-                        //get the string from the stream
-                        pubKeyString = sw.ToString();
-                    }
+                    string pubKeyString = keyToString(pubKey);
 
-                    string privKeyString;
-                    {
-                        //we need some buffer
-                        var sw = new System.IO.StringWriter();
-                        //we need a serializer
-                        var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
-                        //serialize the key into the stream
-                        xs.Serialize(sw, privKey);
-                        //get the string from the stream
-                        privKeyString = sw.ToString();
-                    }
+                    string privKeyString = keyToString(privKey);
 
                     Console.WriteLine(String.Format("Saving keys"));
                     string _nameFile = string.Format("{0}-RSAPrivKey.dat", _name);
@@ -77,6 +57,56 @@ namespace BasicSecurity_Crypto_Program
                     _nameFile = string.Format("{0}-RSAPubKey.dat", _name);
                     saveByte(privKeyString, _nameFile);
                 }
+
+
+                //Ask to send message to... or read message
+                int inputvalue = 0;
+                string value;
+                do
+                {
+                    Console.WriteLine("press 1 to send a message");
+                    Console.WriteLine("Press 2 to read a message");
+                    Console.WriteLine("Press 0 to close this program");
+                    Console.Write("Enter input value:  "); // Prompt
+                    value = Console.ReadLine(); // Get string form message
+                    inputvalue = Convert.ToInt32(value);
+                    switch(inputvalue)
+                    {
+                        case 1:
+                            Console.Write("Send message to?: ");
+                            _name = Console.ReadLine();
+                            string _fileNamePriv = string.Format("{0}-RSAPrivKey.dat", _name);
+                            string _fileNamePub = string.Format("{0}-RSAPubKey.dat", _name);
+                            if (FileUtility.CheckFileExist(_fileNamePub) && FileUtility.CheckFileExist(_fileNamePriv))
+                            {
+                                Console.Write("Message to send: ");
+                                string message = Console.ReadLine();
+                            }
+                            else
+                            {
+                                Console.WriteLine(string.Format("Could not find {0} ", _name));
+                                Console.WriteLine("");
+                            }
+                            break;
+                             
+                    }
+                            
+
+                } while (!(inputvalue == 0));
+
+                //if person is found.
+                
+                //ask what message to encrypt
+
+                //Make md5 of the message.
+
+                //Generate aos key
+
+                //encrypt with aos key
+
+                //Encrypt aos key with private key.
+
+                
 
 
                 //aosEncryption(selectedUser);
@@ -100,31 +130,13 @@ namespace BasicSecurity_Crypto_Program
 
                 if (FileUtility.CheckFileExist(_fileNamePub) && FileUtility.CheckFileExist(_fileNamePriv))
                 {
-                    //how to get the private key
-                    RSAParameters privKey;
-                    RSAParameters pubKey;
-
                     //lees keys
                     string privKeyString = getString(_fileNamePriv);
                     string pubKeyString = getString(_fileNamePub);
 
-                    //converting it back
-                    {
-                        //get a stream from the string
-                        var sr = new System.IO.StringReader(pubKeyString);
-                        //we need a deserializer
-                        var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
-                        //get the object back from the stream
-                        pubKey = (RSAParameters)xs.Deserialize(sr);
-
-
-                        //get a stream from the string
-                        sr = new System.IO.StringReader(privKeyString);
-                        //we need a deserializer
-                        xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
-                        //get the object back from the stream
-                        privKey = (RSAParameters)xs.Deserialize(sr);
-                    }
+                    //how to get the private key
+                    RSAParameters privKey = stringToKey(privKeyString);
+                    RSAParameters pubKey = stringToKey(pubKeyString);
 
                     //Create user with selected name and loaded key and place it in the memory.
                     selectedUser = new User(_name, privKey, pubKey);
@@ -394,6 +406,36 @@ namespace BasicSecurity_Crypto_Program
             byte[] bytes = new byte[str.Length * sizeof(char)];
             System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
             File.WriteAllBytes(nameFile, bytes);
+        }
+
+        private static string keyToString (RSAParameters key)
+        {
+            string keyString;
+
+            //we need some buffer
+            var sw = new System.IO.StringWriter();
+            //we need a serializer
+            var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
+            //serialize the key into the stream
+            xs.Serialize(sw, key);
+            //get the string from the stream
+            keyString = sw.ToString();
+
+            return keyString;
+        }
+
+        private static RSAParameters stringToKey(string keyString)
+        {
+            RSAParameters key;
+
+            //get a stream from the string
+            var sr = new System.IO.StringReader(keyString);
+            //we need a deserializer
+            var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
+            //get the object back from the stream
+            key = (RSAParameters)xs.Deserialize(sr);
+
+            return key;
         }
     }
 }
