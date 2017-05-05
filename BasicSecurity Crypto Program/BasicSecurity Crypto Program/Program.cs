@@ -17,6 +17,8 @@ namespace BasicSecurity_Crypto_Program
             Console.WriteLine("Test Aes and AOS");
             User _selectedUser = null;
             User _sendUser = null;
+            var IV = System.Text.ASCIIEncoding.ASCII.GetBytes("adfqsffafdsfsqdf");
+
             //Try aes encryption
             try
             {
@@ -89,7 +91,7 @@ namespace BasicSecurity_Crypto_Program
                                 string message = Console.ReadLine();
 
                                 _sendUser = loadUser(_name);
-                                aosEncryption1(message, _sendUser);
+                                aosEncryption1(message, _sendUser, IV);
                             }
                             else
                             {
@@ -126,7 +128,8 @@ namespace BasicSecurity_Crypto_Program
                                     var convertedstring = Convert.ToBase64String(aesKeyBytes);
                                     Console.WriteLine(string.Format("MD5 of aeskey: {0}", CalculateMD5Hash(convertedstring)));
 
-                                    string message = decryptMessage(_messageFile, aesKeyBytes);
+                                    string message = decryptMessage(_messageFile, aesKeyBytes, IV);
+                                    Console.WriteLine("Decrypted message: {0}", message);
                                 }
                                 else
                                 {
@@ -179,11 +182,12 @@ namespace BasicSecurity_Crypto_Program
             } 
         }
 
-        private static string decryptMessage(string _messageFile, byte[] aesKeyBytes)
+        private static string decryptMessage(string _messageFile, byte[] aesKeyBytes, byte[] IV)
         {
             using (Aes myAes = Aes.Create())
             {
                 myAes.Key = aesKeyBytes;
+                myAes.IV = IV;
 
                 var test = File.ReadAllBytes(_messageFile);
 
@@ -228,11 +232,12 @@ namespace BasicSecurity_Crypto_Program
             
         }
 
-        private static void aosEncryption1 (string text, User _user)
+        private static void aosEncryption1 (string text, User _user, byte[] iv)
         {
             var csp = new RSACryptoServiceProvider(2048);
             using (Aes myAes = Aes.Create())
             {
+                myAes.IV = iv;
                 //encrypt text with aes key
                 byte[] encrypted = SecurityAes.EncryptStringToBytes_Aes(text,
                     myAes.Key, myAes.IV);
