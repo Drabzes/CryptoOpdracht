@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace BasicSecurity_Crypto_Program.Utility
 {
@@ -47,11 +49,101 @@ namespace BasicSecurity_Crypto_Program.Utility
             return File.ReadAllBytes(_FileName);
         }
 
+        public static byte[] ReadByteArrayFromFileRSA(String _FileName)
+        {
+            int i = 0;
+            byte[] UnTrimmed = new byte[0];
+            UnTrimmed = File.ReadAllBytes(_FileName);
+
+            foreach(byte bit in UnTrimmed)
+            {
+                if (bit != 0)
+                {
+                    i++;
+                }
+            }
+
+
+            byte[] Trimmed = new byte[i];
+
+            i = 0;
+            foreach(byte bit in UnTrimmed)
+            {
+                if (bit != 0)
+                {
+                    Trimmed[i] = bit;
+                    i++;
+                }
+                
+            }
+
+            return Trimmed;
+        }
+
+        public static byte[] ReadByteArrayFromFileRSAPrivate(String _FileName)
+        {
+            int i = 0;
+            byte[] UnTrimmed = new byte[0];
+            UnTrimmed = File.ReadAllBytes(_FileName);
+
+            foreach (byte bit in UnTrimmed)
+            {
+                if (bit != 0)
+                {
+                    i++;
+                }
+            }
+
+
+            byte[] Trimmed = new byte[i];
+
+            i = 0;
+            foreach (byte bit in UnTrimmed)
+            {
+                if (bit != 0)
+                {
+                    Trimmed[i] = bit;
+                    i++;
+                }
+
+            }
+
+            return Trimmed;
+        }
+
         //Giel added
         //Check if file exists.
         public static bool CheckFileExist(string fileName)
         {
             return File.Exists(fileName); ;
+        }
+
+
+        public static bool writeXmlFile(string fileName, string value)
+        {
+
+            fileName = fileName + ".xml";
+            try
+            {
+                File.WriteAllText(fileName, value);
+                return true;
+            }
+            catch(Exception e)
+            {
+                return false;
+            }
+        }
+
+        public static string readXmlFile(string fileName)
+        {
+            string value = "";
+            //var xDocument = XDocument.Load(fileName);
+            //value = xDocument.ToString();
+
+           
+
+
+            return value;
         }
     }
 }
