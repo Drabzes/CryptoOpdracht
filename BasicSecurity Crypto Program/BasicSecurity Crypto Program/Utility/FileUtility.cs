@@ -139,9 +139,6 @@ namespace BasicSecurity_Crypto_Program.Utility
             string value = "";
             //var xDocument = XDocument.Load(fileName);
             //value = xDocument.ToString();
-            Convert.FromBase64String
-           
-
 
             return value;
         }
