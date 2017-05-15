@@ -162,6 +162,7 @@ namespace BasicSecurity_Crypto_Program
                 //aosEncryption(_selectedUser);
                 //rsaEncryption(_selectedUser);
 
+
             }
             catch (Exception e)
             {
@@ -277,8 +278,20 @@ namespace BasicSecurity_Crypto_Program
                 File.WriteAllBytes(_fileName, aesKeyEncrypted);
                 Console.WriteLine(string.Format("AesKey encrypted and saved as: {0}", _fileName));
 
+                do
+                {
+                    _fileName = string.Format("{0}-EncryptedMD5-{1}.dat", _user.getUserName(), fileVersion);
+                } while (FileUtility.CheckFileExist(_fileName));
+
+                //MD5 stuffs
+                var md5 = CalculateMD5Hash(text);
+                Console.WriteLine(string.Format("MD5 of aeskey: {0}", md5));
+                var _MD5Bytes = System.Text.Encoding.Unicode.GetBytes(md5);
+                var _EcryptedMD5 = csp.Encrypt(_MD5Bytes, false);
+                Console.WriteLine(string.Format("MD5 saved as: {0}", _fileName));
 
 
+                /*
                 var bytesPlainTextData = FileUtility.ReadByteArrayFromFileRSA(_fileName);
                 var morebytes = getString(_fileName);
                 var conv = System.Text.Encoding.Unicode.GetBytes(morebytes);
@@ -287,12 +300,10 @@ namespace BasicSecurity_Crypto_Program
                 csp = new RSACryptoServiceProvider();
                 csp.ImportParameters(_user.getPrivKey());
                 var aeKeydecrypted = csp.Decrypt(buff, false);
-
-                var testdata = Convert.ToBase64String(myAes.Key);
+                */
                 
-                Console.WriteLine(string.Format("MD5 of aeskey: {0}", CalculateMD5Hash(testdata)));
-                testdata = Convert.ToBase64String(aeKeydecrypted);
-                Console.WriteLine(string.Format("MD5 of aeskeydecrypt: {0}", CalculateMD5Hash(testdata)));
+                
+                
             }
         }
 
@@ -597,7 +608,7 @@ namespace BasicSecurity_Crypto_Program
 
             MD5 md5 = System.Security.Cryptography.MD5.Create();
 
-            byte[] inputBytes = Convert.FromBase64String(input);
+            byte[] inputBytes = System.Text.Encoding.Unicode.GetBytes(input);
 
             byte[] hash = md5.ComputeHash(inputBytes);
 
