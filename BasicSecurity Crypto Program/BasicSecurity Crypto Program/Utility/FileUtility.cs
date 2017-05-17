@@ -140,9 +140,6 @@ namespace BasicSecurity_Crypto_Program.Utility
             //var xDocument = XDocument.Load(fileName);
             //value = xDocument.ToString();
 
-           
-
-
             return value;
         }
     }
