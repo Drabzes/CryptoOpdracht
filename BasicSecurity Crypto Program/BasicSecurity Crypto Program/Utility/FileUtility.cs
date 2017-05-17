@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -11,106 +12,6 @@ namespace BasicSecurity_Crypto_Program.Utility
 {
     public class FileUtility
     {
-        // write bytes to a file
-        public static bool ByteArrayToFile(string _FileName, byte[] _ByteArray)
-        {
-            try
-            {
-                // Open file for reading
-                System.IO.FileStream _FileStream =
-                   new System.IO.FileStream(_FileName, System.IO.FileMode.Create,
-                                            System.IO.FileAccess.Write);
-                // Writes a block of bytes to this stream using data from
-                // a byte array.
-                _FileStream.Write(_ByteArray, 0, _ByteArray.Length);
-
-                // close file stream
-                _FileStream.Close();
-
-                return true;
-            }
-            catch (Exception _Exception)
-            {
-                // Error
-                Console.WriteLine("Exception caught in process: {0}",
-                                  _Exception.ToString());
-            }
-
-            // error occured, return false
-            return false;
-        }
-
-        //Giel added
-        //Read a byte file and get the value from it in byte[]
-        public static byte[] ReadByteArrayFromFile(String _FileName)
-        {
-            //byte[] buff = null;
-
-            return File.ReadAllBytes(_FileName);
-        }
-
-        public static byte[] ReadByteArrayFromFileRSA(String _FileName)
-        {
-            int i = 0;
-            byte[] UnTrimmed = new byte[0];
-            UnTrimmed = File.ReadAllBytes(_FileName);
-
-            foreach(byte bit in UnTrimmed)
-            {
-                if (bit != 0)
-                {
-                    i++;
-                }
-            }
-
-
-            byte[] Trimmed = new byte[i];
-
-            i = 0;
-            foreach(byte bit in UnTrimmed)
-            {
-                if (bit != 0)
-                {
-                    Trimmed[i] = bit;
-                    i++;
-                }
-                
-            }
-
-            return Trimmed;
-        }
-
-        public static byte[] ReadByteArrayFromFileRSAPrivate(String _FileName)
-        {
-            int i = 0;
-            byte[] UnTrimmed = new byte[0];
-            UnTrimmed = File.ReadAllBytes(_FileName);
-
-            foreach (byte bit in UnTrimmed)
-            {
-                if (bit != 0)
-                {
-                    i++;
-                }
-            }
-
-
-            byte[] Trimmed = new byte[i];
-
-            i = 0;
-            foreach (byte bit in UnTrimmed)
-            {
-                if (bit != 0)
-                {
-                    Trimmed[i] = bit;
-                    i++;
-                }
-
-            }
-
-            return Trimmed;
-        }
-
         //Giel added
         //Check if file exists.
         public static bool CheckFileExist(string fileName)
@@ -118,29 +19,77 @@ namespace BasicSecurity_Crypto_Program.Utility
             return File.Exists(fileName); ;
         }
 
-
-        public static bool writeXmlFile(string fileName, string value)
+        public static void loadfileList(User _selectedUser)
         {
-
-            fileName = fileName + ".xml";
-            try
+            int fileVersion = 1;
+            string _fileName = string.Format("{0}-MessageFile-{1}.dat", _selectedUser.getUserName(), fileVersion);
+            while (FileUtility.CheckFileExist(_fileName))
             {
-                File.WriteAllText(fileName, value);
-                return true;
-            }
-            catch(Exception e)
-            {
-                return false;
+                Console.WriteLine(_fileName);
+                fileVersion++;
+                _fileName = string.Format("{0}-MessageFile-{1}.dat", _selectedUser.getUserName(), fileVersion);
             }
         }
 
-        public static string readXmlFile(string fileName)
+        public static string getString(string nameFile)
         {
-            string value = "";
-            //var xDocument = XDocument.Load(fileName);
-            //value = xDocument.ToString();
+            byte[] bytes = File.ReadAllBytes(nameFile);
+            char[] chars = new char[bytes.Length / sizeof(char)];
+            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+            return new string(chars);
+        }
 
-            return value;
+        private static RSAParameters stringToKey(string keyString)
+        {
+            RSAParameters key;
+
+            //get a stream from the string
+            var sr = new System.IO.StringReader(keyString);
+            //we need a deserializer
+            var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
+            //get the object back from the stream
+            key = (RSAParameters)xs.Deserialize(sr);
+
+            return key;
+        }
+
+        public static void saveByte(string str, string nameFile)
+        {
+            byte[] bytes = new byte[str.Length * sizeof(char)];
+            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            File.WriteAllBytes(nameFile, bytes);
+        }// set string om naar bytes en daarna in een file
+
+        public static User loadUser(string _name)
+        {
+            try
+            {
+                User selectedUser;
+                string _fileNamePriv = string.Format("{0}-RSAPrivKey.dat", _name);
+                string _fileNamePub = string.Format("{0}-RSAPubKey.dat", _name);
+
+                if (FileUtility.CheckFileExist(_fileNamePub) && FileUtility.CheckFileExist(_fileNamePriv))
+                {
+                    //lees keys
+                    string privKeyString = getString(_fileNamePriv);
+                    string pubKeyString = getString(_fileNamePub);
+
+                    //how to get the private key
+                    RSAParameters privKey = stringToKey(privKeyString);
+                    RSAParameters pubKey = stringToKey(pubKeyString);
+
+                    //Create user with selected name and loaded key and place it in the memory.
+                    selectedUser = new User(_name, privKey, pubKey);
+                    Console.WriteLine(string.Format("Loaded all data from user: {0} ", selectedUser.getUserName()));
+                    return selectedUser;
+                }
+                return null;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+
         }
     }
 }
